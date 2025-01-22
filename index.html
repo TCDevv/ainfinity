@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI-NFINITY Terminal</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #000;
+      color: #00ff00;
+      font-family: monospace;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .terminal {
+      background-color: #000;
+      width: 80%;
+      height: 60%;
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+      overflow-y: auto;
+      white-space: pre-wrap;
+      z-index: 1;
+      position: relative;
+    }
+
+    #input {
+      width: 100%;
+      background: none;
+      border: none;
+      color: #00ff00;
+      font-family: monospace;
+      font-size: 16px;
+      outline: none;
+    }
+
+    #output {
+      margin-bottom: 8px;
+    }
+
+    .logo {
+      color: #ffffff;
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 16px;
+      z-index: 1;
+      position: relative;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    .typing {
+      display: inline;
+      white-space: pre;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="neonCanvas"></canvas>
+  <div class="logo">Welcome to <span style="color: #00ff00;">AI-NFINITY</span> Terminal</div>
+  <div class="terminal" id="terminal">
+    <div id="output">Type `help` to see available commands.</div>
+    <input id="input" type="text" autofocus placeholder="Enter a command...">
+  </div>
+
+  <script>
+    // Neon background effect
+    const canvas = document.getElementById('neonCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const neonText = "AI-NFINITY";
+    const fontSize = 20;
+    const columns = Math.floor(canvas.width / fontSize);
+    const drops = Array(columns).fill(0);
+
+    function drawNeon() {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = '#0F0';
+      ctx.font = `${fontSize}px monospace`;
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = neonText[Math.floor(Math.random() * neonText.length)];
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.95) {
+          drops[i] = 0;
+        }
+
+        drops[i]++;
+      }
+    }
+
+    setInterval(drawNeon, 50);
+
+    // Terminal functionality with typing effect
+    const terminal = document.getElementById("terminal");
+    const input = document.getElementById("input");
+    const output = document.getElementById("output");
+
+    const commands = {
+      help: () => "Available commands: help, ca, intro, clear",
+      ca: () => "Smart Contract: 0x1234...abcd",
+      intro: () => `AI-NFINITY is the revolutionary cryptocurrency that combines AI with limitless possibilities. \nFeatures:\n- Powered by cutting-edge AI technology.\n- Designed for scalability and efficiency.\n- Built for the future of decentralized finance.`,
+      clear: () => {
+        output.innerHTML = "";
+        return "Console cleared. Type 'help' for commands.";
+      }
+    };
+
+    function typeEffect(text, callback) {
+      let i = 0;
+      const typingElement = document.createElement('div');
+      typingElement.className = 'typing';
+      output.appendChild(typingElement);
+
+      function typeChar() {
+        if (i < text.length) {
+          typingElement.textContent += text.charAt(i);
+          i++;
+          setTimeout(typeChar, 50);
+        } else if (callback) {
+          callback();
+        }
+      }
+
+      typeChar();
+    }
+
+    input.addEventListener("keypress", function (event) {
+      if (event.key === "Enter") {
+        const command = input.value.trim();
+        input.value = "";
+
+        if (commands[command]) {
+          output.innerHTML += `\n> ${command}\n`;
+          typeEffect(commands[command]());
+        } else {
+          output.innerHTML += `\n> ${command}\n`;
+          typeEffect("Command not recognized.");
+        }
+
+        terminal.scrollTop = terminal.scrollHeight;
+      }
+    });
+  </script>
+</body>
+</html>
